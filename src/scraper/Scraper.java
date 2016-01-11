@@ -11,47 +11,52 @@ import com.jaunt.*;
 
 public class Scraper {
 
-	private String DVD_RELEASE_BASE_URL = "http://www.dvdsreleasedates.com/releases/";
-	private UserAgent userAgent;
+    private final String DVD_RELEASE_BASE_URL = "http://www.dvdsreleasedates.com/releases/";
+    private UserAgent userAgent;
 
     public Scraper() {
         userAgent = new UserAgent();
     }
 
-	public String buildDVDReleaseURL(int year, int month) {
-		DateFormatSymbols dfs = new DateFormatSymbols();
-		String[] months = dfs.getMonths();
+    public String buildDVDReleaseURL(int year, int month) {
+        DateFormatSymbols dfs = new DateFormatSymbols();
+        String[] months = dfs.getMonths();
 
-		StringBuilder DVDReleaseURL = new StringBuilder();
-		DVDReleaseURL.append(DVD_RELEASE_BASE_URL);
-		DVDReleaseURL.append(year + "/" + month + "/");
-		DVDReleaseURL.append("new-dvd-releases-" + months[month] + "-" + year);
-		return DVDReleaseURL.toString();
-	}
-
-    private Element getTableFromURL(String url, int tableNumber) {
-        try {
-            userAgent.visit(url); // visit
-
-            // Find all the tables
-            Elements tables = userAgent.doc.findEach("<table>");
-            System.out.println("Found " + tables.size() + " tables:");
-            System.out.println("Returning table number " + tableNumber);
-
-            return tables.getElement(tableNumber);
-        }
-        catch (JauntException e){
-            System.out.println(e);
-        }
+        String DVDReleaseURL = DVD_RELEASE_BASE_URL +
+                year + "/" + month + "/" +
+                "new-dvd-releases-" +
+                months[month] + "-" + year;
+        return DVDReleaseURL;
     }
 
-	public List<String> findDVDReleases(int year, int month) {
+    private Element getTableFromURL(String url, int tableNumber) throws NotFound {
+        try {
+            userAgent.visit(url); // visit
+        } catch (ResponseException e) {
+            e.printStackTrace();
+        }
 
-		String DVDReleaseURL = buildDVDReleaseURL(year, month);
+        // Find all the tables
+        Elements tables = userAgent.doc.findEach("<table>");
+        System.out.println("Found " + tables.size() + " tables:");
+        System.out.println("Returning table number " + tableNumber);
 
-		List<String> DVDList = new ArrayList<String>();
+        return tables.getElement(tableNumber);
+    }
 
-        Element table = getTableFromURL(DVDReleaseURL, 0);
+    public List<String> findDVDReleases(int year, int month) {
+
+        String DVDReleaseURL = buildDVDReleaseURL(year, month);
+
+        List<String> DVDList = new ArrayList<String>();
+
+        Element table;
+        try {
+            table = getTableFromURL(DVDReleaseURL, 0);
+        } catch (NotFound notFound) {
+            notFound.printStackTrace();
+            return DVDList;
+        }
 
         // Loop through rows in first table,
         Elements trs = table.findEach("<tr>");
@@ -72,27 +77,26 @@ public class Scraper {
         }
 
         return DVDList;
-	}
+    }
 
-	public String findMetacriticScore(String movieName) {
-		String uri = "";
-		try {
-			uri = new URIBuilder()
-					.setScheme("http")
-					.setHost("http://www.metacritic.com/")
-					.setPath("/search/all/" + movieName + "/results")
-					.build().toASCIIString();
-		} catch (URISyntaxException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return uri;
-	}
+    public String findMetacriticScore(String movieName) {
+        String uri = "";
+        try {
+            uri = new URIBuilder()
+                    .setScheme("http")
+                    .setHost("http://www.metacritic.com/")
+                    .setPath("/search/all/" + movieName + "/results")
+                    .build().toASCIIString();
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+        return uri;
+    }
 
-	public static void main(String args[]) {
-		Scraper scraper = new Scraper();
-		List<String> DVDList;
-		DVDList = scraper.findDVDReleases(2015, 12);
-		System.out.println(DVDList);
-	}
+    public static void main(String args[]) {
+        Scraper scraper = new Scraper();
+        List<String> DVDList;
+        DVDList = scraper.findDVDReleases(2015, 12);
+        System.out.println(DVDList);
+    }
 }
