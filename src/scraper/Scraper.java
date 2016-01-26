@@ -72,7 +72,7 @@ public class Scraper {
                 // Fix special html escape characters
                 linkText = StringEscapeUtils.unescapeHtml4(linkText);
 
-                DVDList.add(linkText);
+                DVDList.add("\"" + linkText + "\"");
             }
         }
 

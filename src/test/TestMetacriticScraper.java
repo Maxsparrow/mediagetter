@@ -10,7 +10,7 @@ import scraper.MetacriticScraper;
  */
 public class TestMetacriticScraper {
 
-    MetacriticScraper scraper;
+    private MetacriticScraper scraper;
 
     private static String MOVIE_EXAMPLE_1 = "He named me Malala";
     private static String TV_EXAMPLE_1 = "Fear the Walking Dead: Season 1";
@@ -21,13 +21,13 @@ public class TestMetacriticScraper {
     }
 
     @Test
-    public void testGetMovieScoreEasy() {
+    public void testGetMovieScore() {
         int score = scraper.getScore(MediaGetter.MOVIE, MOVIE_EXAMPLE_1);
         Assert.assertEquals(score, 61);
     }
 
     @Test
-    public void testGetMovieLinkEasy() {
+    public void testGetMovieLink() {
         String link = scraper.getLink(MediaGetter.MOVIE, MOVIE_EXAMPLE_1);
         Assert.assertEquals(link, "http://www.metacritic.com/movie/he-named-me-malala");
     }
@@ -39,7 +39,7 @@ public class TestMetacriticScraper {
     }
 
     @Test
-    public void testGetTVLinkEasy() {
+    public void testGetTVLink() {
         String link = scraper.getLink(MediaGetter.TV, TV_EXAMPLE_1);
         Assert.assertEquals(link, "http://www.metacritic.com/tv/fear-the-walking-dead");
     }
